@@ -15,30 +15,24 @@ body {
   font-size: 24px;
 }
 
-.app-main {
+.app {
   height: 100%;
 }
 
-.home-main {
+[class$="-main"] {
   display: flex;
   height: 100%;
   flex-flow: row nowrap;
-  justify-content: space-evenly;
+  justify-content: space-around;
 }
 
 [class$="-panel"] {
+  flex: 1;
   margin: 5px;
   width: 100%;
   text-align: center;
   border-radius: 15px;
-}
-
-.options-panel, .user-panel {
-  flex: 1;
-}
-
-.posts-panel {
-  flex: 3;
+  background-color: #dfd9f5;
 }
 
 .header {
@@ -46,4 +40,9 @@ body {
   border-radius: 15px 15px 0px 0px;
   font-size: 48px;
   text-shadow: 2px 2px 2px rgb(150, 121, 255);
+}
+
+hr {
+  background-color: rgb(150, 121, 255);
+  border: 1px solid rgb(150, 121, 255);
 }

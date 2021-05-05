@@ -1,5 +1,4 @@
 import React from 'react';
-import '../css/options-panel.css';
 
 export default class OptionsPanel extends React.Component {
   constructor(props) {
