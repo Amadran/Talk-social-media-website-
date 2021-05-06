@@ -3,7 +3,7 @@ let User = require('../models/user-model.js');
 let Post = require('../models/post-model.js');
 
 // create new post
-router.route('/posts/create/').post((req, res) => {
+router.post('/posts/create/',(req, res) => {
   User.exists({username: req.body.username})
       .then(ifExist => {
         if (!ifExist) {
@@ -23,13 +23,13 @@ router.route('/posts/create/').post((req, res) => {
 });
 
 // delete post
-router.route('/posts/delete/:id').delete((req, res) => {
+router.delete('/posts/delete/:id',(req, res) => {
   User.findById(req.params.id).populate('user')
       .then(post => {
         if (post.user.username !== req.body.username) {
           res.status(400).json({
             id: req.params.id,
-            username: username,
+            username: req.body.username,
             error: "user not authorized to delete this post"
           });
         } else {

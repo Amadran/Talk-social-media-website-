@@ -3,7 +3,7 @@ let User = require('../models/user-model.js');
 let Post = require('../models/post-model.js');
 
 // create a new user with password
-router.route('/new/').post((req, res) => {
+router.post('/new/',(req, res) => {
   User.exists({username: req.body.username})
       .then(ifExist => {
         if (ifExist) {
@@ -27,7 +27,7 @@ router.route('/new/').post((req, res) => {
 });
 
 // login and get data if password matches
-router.route('/:username').post((req, res) => {
+router.post('/:username',(req, res) => {
   User.findOne({username: req.params.username}).populate('posts')
     .then(userData => {
       if (req.body.password === userData.password) {
