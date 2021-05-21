@@ -21,7 +21,7 @@ mongoose.connection.once('open', () => {
 const homeRouter = require('./routes/home.js');
 const loginRouter = require('./routes/login.js');
 app.use('/login', loginRouter);
-app.use('/', homeRouter);
+app.use('/home', homeRouter);
 
 // start server
 app.listen(PORT, () => {

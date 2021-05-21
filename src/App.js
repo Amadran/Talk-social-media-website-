@@ -1,23 +1,145 @@
 import React from 'react';
-import {BrowserRouter, Switch, Route} from 'react-router-dom';
+import {withRouter, Switch, Route, Redirect} from 'react-router-dom';
 import Home from './components/home-main.js';
 import Login from './components/login-main.js';
+import './css/index.css';
+import './css/login.css';
+import './css/posts-panel.css';
+import './css/post.css';
 
-function App() {
-  return (
-    <div className="app">
-      <BrowserRouter>
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.handleLoginChange = this.handleLoginChange.bind(this);
+    this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
+    this.handleNewPostSubmit = this.handleNewPostSubmit.bind(this);
+
+    this.state = {
+      user: {
+        _id: '',
+        username: '',
+        password: '',
+        posts: [] // array of objects of the form {_id: ..., text: '...'}
+      },
+      isLoggedIn: false
+    };
+  }
+
+  // changes state for login details
+  //  - username, password
+  //  - (upon successful login) _id, posts
+  handleLoginChange(event) {
+    let userObject = this.state.user;
+    userObject[event.target.name] = event.target.value;
+    this.setState({user: userObject});
+  }
+  
+  // performs POST request to authenticate the user and login,
+  // retrieving other user information such as posts
+  async handleLoginSubmit(event) {
+    event.preventDefault();
+
+    const DOMAIN = process.env.REACT_APP_ROOT_API_DOMAIN;
+    const PORT = process.env.REACT_APP_ROOT_API_PORT;
+    const fetchURL = `${DOMAIN}:${PORT}/login/`;
+    const username = this.state.user.username;
+    const password = this.state.user.password;
+    const requestBody = {username, password};
+
+    try {
+      const res = await fetch(fetchURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(requestBody)
+      });
+    
+      const userData = await res.json();
+      if (userData.username) {
+        this.setState({
+          user: {
+            _id: userData._id,
+            username: username,
+            password: password,
+            posts: userData.posts
+          },
+          isLoggedIn: true
+        });
+        this.props.history.push("/home/" + username);
+        console.log('successfully logged in');
+      } else {
+        this.setState({isLoggedIn: false});
+        console.log('Error: failed to log in');
+      }
+    } catch (err) {
+      console.log('Error: ' + err);
+    }
+  }
+
+  // performs POST request to submit a new post created by
+  // the currently logged in user
+  async handleNewPostSubmit(event, text) {
+    event.preventDefault();
+
+    const DOMAIN = process.env.REACT_APP_ROOT_API_DOMAIN;
+    const PORT = process.env.REACT_APP_ROOT_API_PORT;
+    const fetchURL = `${DOMAIN}:${PORT}/home/posts/create/`;
+    const userID = this.state.user._id;
+    const requestBody = {userID, text};
+
+    try {
+      let res = await fetch(fetchURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(requestBody)
+      });
+    
+      // add new post to state's user.posts array
+      const postData = await res.json();
+      if (postData) {
+        console.log(postData.message);
+        let userObject = this.state.user;
+        userObject.posts.push({
+          _id: postData._id,
+          text: postData.text
+        });
+        this.setState({user: userObject});
+      }
+    } catch (err) {
+      console.log('Error: ' + err);
+    }
+  }
+
+  render() {
+    return (
+      <div className="app">
         <Switch>
-          <Route path="/login">
-            <Login />
+          <Route exact path="/">
+            <Redirect to="/login/"/>
           </Route>
-          <Route path="/">
-            <Home />
+          <Route path="/home/">
+            {this.state.isLoggedIn  ?
+              <Home
+                user={this.state.user}
+                onNewPostSubmit={this.handleNewPostSubmit} 
+              />                    : 
+              <Redirect to="/"/>
+            }
+          </Route>
+          <Route path="/login/">
+            <Login
+              onChange={this.handleLoginChange}
+              onSubmit={this.handleLoginSubmit}
+            />
           </Route>
         </Switch>
-      </BrowserRouter>
-    </div>
-  );
+      </div>
+    );
+  }
 }
 
-export default App;
+export default withRouter(App);
