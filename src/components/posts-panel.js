@@ -13,7 +13,10 @@ export default function PostsPanel(props) {
           return <Post
                     text={post.text}
                     key={post._id}
+                    _id={post._id}
                     username={props.user.username}
+                    created={post.created}
+                    onPostDelete={props.onPostDelete}
                   />;
         })}
       </ul>

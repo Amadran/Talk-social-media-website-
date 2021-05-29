@@ -7,7 +7,11 @@ export default function Home(props) {
   return (
     <div className="home-main">
       <OptionsPanel />
-      <PostsPanel user={props.user} onNewPostSubmit={props.onNewPostSubmit} />
+      <PostsPanel
+        user={props.user} 
+        onNewPostSubmit={props.onNewPostSubmit}
+        onPostDelete={props.onPostDelete}  
+      />
       <UserPanel user={props.user} />
     </div>
   );

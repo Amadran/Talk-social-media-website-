@@ -14,13 +14,14 @@ class App extends React.Component {
     this.handleLoginChange = this.handleLoginChange.bind(this);
     this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
     this.handleNewPostSubmit = this.handleNewPostSubmit.bind(this);
+    this.handlePostDelete = this.handlePostDelete.bind(this);
 
     this.state = {
       user: {
         _id: '',
         username: '',
         password: '',
-        posts: [] // array of objects of the form {_id: ..., text: '...'}
+        posts: [] // array of objects of the form {_id: ..., text: '...', created: <some date>}
       },
       isLoggedIn: false
     };
@@ -40,21 +41,13 @@ class App extends React.Component {
   async handleLoginSubmit(event) {
     event.preventDefault();
 
-    const DOMAIN = process.env.REACT_APP_ROOT_API_DOMAIN;
-    const PORT = process.env.REACT_APP_ROOT_API_PORT;
-    const fetchURL = `${DOMAIN}:${PORT}/login/`;
+    const path = '/login';
     const username = this.state.user.username;
     const password = this.state.user.password;
     const requestBody = {username, password};
 
     try {
-      const res = await fetch(fetchURL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify(requestBody)
-      });
+      const res = await this.makeRequest(path, 'POST', requestBody);
     
       const userData = await res.json();
       if (userData.username) {
@@ -67,7 +60,7 @@ class App extends React.Component {
           },
           isLoggedIn: true
         });
-        this.props.history.push("/home/" + username);
+        this.props.history.push('/home/' + username);
         console.log('successfully logged in');
       } else {
         this.setState({isLoggedIn: false});
@@ -83,20 +76,12 @@ class App extends React.Component {
   async handleNewPostSubmit(event, text) {
     event.preventDefault();
 
-    const DOMAIN = process.env.REACT_APP_ROOT_API_DOMAIN;
-    const PORT = process.env.REACT_APP_ROOT_API_PORT;
-    const fetchURL = `${DOMAIN}:${PORT}/home/posts/create/`;
+    const path = '/home/posts/create';
     const userID = this.state.user._id;
     const requestBody = {userID, text};
 
     try {
-      let res = await fetch(fetchURL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify(requestBody)
-      });
+      let res = await this.makeRequest(path, 'POST', requestBody);
     
       // add new post to state's user.posts array
       const postData = await res.json();
@@ -105,13 +90,59 @@ class App extends React.Component {
         let userObject = this.state.user;
         userObject.posts.push({
           _id: postData._id,
-          text: postData.text
+          text: postData.text,
+          created: postData.created
         });
         this.setState({user: userObject});
       }
     } catch (err) {
       console.log('Error: ' + err);
     }
+  }
+
+  async handlePostDelete(event, postID) {
+    event.preventDefault();
+
+    const path = '/home/posts/delete';
+    const userID = this.state.user._id;
+    const requestBody = {
+      _id: postID,
+      user: userID
+    };
+
+    try {
+      let res = await this.makeRequest(path, 'DELETE', requestBody);
+      const resJSON = await res.json();
+
+      if (!resJSON.error) {
+        let userObject = this.state.user;
+        userObject.posts.splice(userObject.posts.findIndex(post => {
+          return post._id === postID;
+        }), 1);
+        this.setState({user: userObject});
+      }
+    } catch (err) {
+      console.log('Error: ' + err);
+    }
+  }
+
+  // ~~~HELPERS~~~
+
+  // uses built-in fetch API call to make a request to URL
+  // with body "requestBody" and method "method"
+  async makeRequest(relativeURL, method, requestBody) {
+    const DOMAIN = process.env.REACT_APP_ROOT_API_DOMAIN;
+    const PORT = process.env.REACT_APP_ROOT_API_PORT;
+
+    const response = await fetch(`${DOMAIN}:${PORT}${relativeURL}/`, {
+      method: method.toUpperCase(),
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    return response;
   }
 
   render() {
@@ -125,7 +156,8 @@ class App extends React.Component {
             {this.state.isLoggedIn  ?
               <Home
                 user={this.state.user}
-                onNewPostSubmit={this.handleNewPostSubmit} 
+                onNewPostSubmit={this.handleNewPostSubmit}
+                onPostDelete={this.handlePostDelete}
               />                    : 
               <Redirect to="/"/>
             }

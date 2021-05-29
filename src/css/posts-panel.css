@@ -1,5 +1,6 @@
 .posts-panel {
   flex: 3;
+  overflow-y: scroll;
 }
 
 .posts-list {

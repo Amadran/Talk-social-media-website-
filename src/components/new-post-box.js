@@ -13,11 +13,13 @@ export default class NewPostBox extends React.Component {
   }
 
   handleChange(event) {
+    event.preventDefault();
     this.setState({text: event.target.value});
   }
 
   handleSubmit(event) {
     this.props.onNewPostSubmit(event, this.state.text);
+    event.target.newPost.value = "";
   }
 
   render() {
@@ -26,7 +28,7 @@ export default class NewPostBox extends React.Component {
         <form onSubmit={this.handleSubmit}>
           <label htmlFor="new-post">New Post</label>
           <textarea
-            name="new-post"
+            name="newPost"
             type="text"
             onChange={this.handleChange}
           />
