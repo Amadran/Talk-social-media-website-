@@ -22,6 +22,11 @@ const userSchema = new Schema({
     ref: 'Post',
     required: true
   }]
+}, {
+  timestamps: {
+    createdAt: 'created',
+    updatedAt: 'updated'
+  }
 });
 
 let User = mongoose.model('User', userSchema);

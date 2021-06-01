@@ -12,7 +12,12 @@ app.use(express.json());
 
 // MongoDB database connection
 const URI = process.env.ATLAS_URI;
-mongoose.connect(URI, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true});
+mongoose.connect(URI, {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false
+});
 mongoose.connection.once('open', () => {
     console.log("Server successfully connected to MongoDB Atlas");
 });

@@ -6,8 +6,12 @@ export default class Post extends React.Component {
 
     this.handleDelete = this.handleDelete.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
+    this.handleEditChange = this.handleEditChange.bind(this);
 
-    this.state = {};
+    this.state = {
+      text: this.props.text,
+      isEditting: false
+    };
   }
 
   handleDelete(event) {
@@ -15,22 +19,36 @@ export default class Post extends React.Component {
   }
 
   handleEdit(event) {
-    event.preventDefault();
+    if (this.state.isEditting) {
+      this.props.onPostEdit(event, this.props._id, this.state.text);
+    }
+    this.setState({isEditting: !(this.state.isEditting)});
+  }
+
+  handleEditChange(event) {
+    this.setState({text: event.target.value});
   }
 
   formatDate(date) {
     const created = new Date(date);
     let createdAMPM;
-    if (created.getHours < 12) {
+    let hour = created.getHours();
+
+    if (hour < 12) {
       createdAMPM = 'am';
     } else {
       createdAMPM = 'pm';
+      hour -= 12;
     }
 
-    return `${created.getHours()}:${created.getMinutes()} - ${created.getDate()}/${created.getMonth()}/${created.getFullYear()}`;
+    return `${hour}:${created.getMinutes()} ${createdAMPM} - \
+            ${created.getDate()}/${created.getMonth()}/${created.getFullYear()}`;
   }
 
   render() {
+    let editElem = <textarea className="edit-post-box" value={this.state.text} onChange={this.handleEditChange}/>
+    let textElem = <p>{this.state.text}</p>;
+
     return (
       <li className="post">
         <header className="post-header">
@@ -38,13 +56,11 @@ export default class Post extends React.Component {
           <span className="created">{this.formatDate(this.props.created)}</span>
         </header>
         <div>
-          <p>
-            {this.props.text}
-          </p>
+          {this.state.isEditting ? editElem : textElem}
           <input
             className="edit-post"
             type="button"
-            value="edit post"
+            value={this.state.isEditting ? "save edit" : "edit post"}
             onClick={this.handleEdit}
           />
           <input

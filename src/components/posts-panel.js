@@ -17,6 +17,7 @@ export default function PostsPanel(props) {
                     username={props.user.username}
                     created={post.created}
                     onPostDelete={props.onPostDelete}
+                    onPostEdit={props.onPostEdit}
                   />;
         })}
       </ul>

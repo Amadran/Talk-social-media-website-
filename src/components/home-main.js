@@ -11,6 +11,7 @@ export default function Home(props) {
         user={props.user} 
         onNewPostSubmit={props.onNewPostSubmit}
         onPostDelete={props.onPostDelete}  
+        onPostEdit={props.onPostEdit}
       />
       <UserPanel user={props.user} />
     </div>

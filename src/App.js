@@ -15,6 +15,7 @@ class App extends React.Component {
     this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
     this.handleNewPostSubmit = this.handleNewPostSubmit.bind(this);
     this.handlePostDelete = this.handlePostDelete.bind(this);
+    this.handlePostEdit = this.handlePostEdit.bind(this);
 
     this.state = {
       user: {
@@ -107,7 +108,8 @@ class App extends React.Component {
     const userID = this.state.user._id;
     const requestBody = {
       _id: postID,
-      user: userID
+      user: userID,
+      username: this.state.user.username
     };
 
     try {
@@ -119,6 +121,40 @@ class App extends React.Component {
         userObject.posts.splice(userObject.posts.findIndex(post => {
           return post._id === postID;
         }), 1);
+        this.setState({user: userObject});
+      }
+    } catch (err) {
+      console.log('Error: ' + err);
+    }
+  }
+
+  async handlePostEdit(event, postID, postEdit) {
+    event.preventDefault();
+
+    const path = '/home/posts/edit';
+    const userID = this.state.user._id;
+    const requestBody = {
+      _id: postID,
+      user: userID,
+      username: this.state.user.username,
+      textEdit: postEdit
+    };
+
+    try {
+      let res = await this.makeRequest(path, 'PUT', requestBody);
+      const resJSON = await res.json();
+
+      if (!resJSON.error) {
+        let userObject = this.state.user;
+        userObject.posts.map(post => {
+          let tempPost = post;
+
+          if (postID === post._id) {
+            tempPost.text = resJSON.edittedPost;           
+          }
+
+          return tempPost;
+        });
         this.setState({user: userObject});
       }
     } catch (err) {
@@ -158,6 +194,7 @@ class App extends React.Component {
                 user={this.state.user}
                 onNewPostSubmit={this.handleNewPostSubmit}
                 onPostDelete={this.handlePostDelete}
+                onPostEdit={this.handlePostEdit}
               />                    : 
               <Redirect to="/"/>
             }

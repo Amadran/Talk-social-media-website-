@@ -12,10 +12,11 @@ const postSchema = new Schema({
     trim: true,
     maxLength: 250,
     required: true
-  },
-  created: {
-    type: Date,
-    required: true
+  }
+}, {
+  timestamps: {
+    createdAt: 'created',
+    updatedAt: 'updated'
   }
 });
 
